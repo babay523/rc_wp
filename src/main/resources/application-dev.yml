@@ -1,0 +1,45 @@
+# 开发环境配置（使用 Docker 中的 MySQL 和 RocketMQ）
+spring:
+  # MySQL 数据库配置
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3307/notification_system?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai
+    username: notification
+    password: notification123
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 5
+  
+  # 数据库初始化（首次启动后改为 never）
+  sql:
+    init:
+      mode: never
+      schema-locations: classpath:db/schema.sql
+
+# 应用配置
+notification:
+  # 使用真实 RocketMQ
+  mq:
+    mode: rocketmq
+
+# RocketMQ 配置
+rocketmq:
+  name-server: localhost:9876
+  producer:
+    group: notification-producer-group
+    send-message-timeout: 3000
+    retry-times-when-send-failed: 2
+  consumer:
+    group: notification-consumer-group
+
+# MyBatis Plus 配置
+mybatis-plus:
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+# 日志配置
+logging:
+  level:
+    root: INFO
+    com.notification: DEBUG
+    org.apache.rocketmq: INFO

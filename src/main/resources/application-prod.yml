@@ -1,0 +1,87 @@
+# 生产环境配置
+spring:
+  # MySQL 数据库配置
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: ${SPRING_DATASOURCE_URL:jdbc:mysql://localhost:3306/notification_system?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai}
+    username: ${SPRING_DATASOURCE_USERNAME:notification}
+    password: ${SPRING_DATASOURCE_PASSWORD:notification123}
+    hikari:
+      maximum-pool-size: 20
+      minimum-idle: 5
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+  
+  # 数据库初始化（生产环境建议手动执行）
+  sql:
+    init:
+      mode: never
+
+# RocketMQ 配置
+rocketmq:
+  name-server: ${ROCKETMQ_NAMESRV_ADDR:localhost:9876}
+  producer:
+    group: notification-producer-group
+    send-message-timeout: 3000
+    retry-times-when-send-failed: 2
+    max-message-size: 4194304
+  consumer:
+    group: notification-consumer-group
+    consume-thread-min: 5
+    consume-thread-max: 20
+
+# 应用配置
+notification:
+  # 使用真实 RocketMQ
+  mq:
+    mode: ${NOTIFICATION_MQ_MODE:rocketmq}
+
+# MyBatis Plus 配置
+mybatis-plus:
+  configuration:
+    # 生产环境关闭 SQL 日志
+    log-impl: org.apache.ibatis.logging.nologging.NoLoggingImpl
+  global-config:
+    db-config:
+      logic-delete-field: deleted
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+
+# 日志配置
+logging:
+  level:
+    root: INFO
+    com.notification: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
+  file:
+    name: /var/log/notification-system/application.log
+    max-size: 100MB
+    max-history: 30
+
+# Actuator 配置（用于健康检查）
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+      base-path: /actuator
+  endpoint:
+    health:
+      show-details: when-authorized
+  health:
+    defaults:
+      enabled: true
+
+# 服务器配置
+server:
+  port: 8080
+  servlet:
+    context-path: /api
+  tomcat:
+    threads:
+      max: 200
+      min-spare: 10
+    max-connections: 10000
+    accept-count: 100
