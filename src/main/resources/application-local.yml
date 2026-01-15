@@ -1,0 +1,41 @@
+# 本地开发环境配置（不依赖 RocketMQ）
+spring:
+  # H2 内存数据库配置
+  datasource:
+    driver-class-name: org.h2.Driver
+    url: jdbc:h2:mem:notification_system;MODE=MySQL;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    username: sa
+    password:
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+  
+  # 自动执行数据库初始化脚本
+  sql:
+    init:
+      mode: always
+      schema-locations: classpath:schema-h2.sql
+
+# 应用配置
+notification:
+  # 使用 Mock MQ（不需要真实 RocketMQ）
+  mq:
+    mode: mock  # mock 或 rocketmq
+    mock:
+      # Mock 模式下的延迟时间缩放因子（实际延迟 = 原延迟 / scale-factor）
+      # 例如：原本 60 秒的延迟，在 mock 模式下变为 60/10 = 6 秒
+      delay-scale-factor: 10
+      # 是否启用异步投递
+      async-dispatch: true
+
+# MyBatis Plus 配置
+mybatis-plus:
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+# 日志配置
+logging:
+  level:
+    root: INFO
+    com.notification: DEBUG
